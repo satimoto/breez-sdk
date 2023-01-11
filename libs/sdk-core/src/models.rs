@@ -220,7 +220,7 @@ pub struct NodeState {
     pub block_height: u32,
     pub channels_balance_msat: u64,
     pub onchain_balance_msat: u64,
-    pub utxos: Vec<UnspentTransactionOutput>,
+    pub utxos: Vec<Utxo>,
     pub max_payable_msat: u64,
     pub max_receivable_msat: u64,
     pub max_single_payment_amount_msat: u64,
@@ -356,7 +356,7 @@ pub fn parse_short_channel_id(id_str: &str) -> Result<u64> {
 }
 
 #[derive(Serialize, Deserialize, Clone, PartialEq, Eq, Debug)]
-pub struct UnspentTransactionOutput {
+pub struct Utxo {
     pub txid: Vec<u8>,
     pub outnum: u32,
     pub amount_millisatoshi: u64,
