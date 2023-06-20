@@ -275,7 +275,7 @@ dependencies = [
  "cc",
  "cfg-if",
  "libc",
- "miniz_oxide",
+ "miniz_oxide 0.6.2",
  "object",
  "rustc-demangle",
 ]
@@ -382,7 +382,7 @@ dependencies = [
 [[package]]
 name = "bolt-derive"
 version = "0.1.0"
-source = "git+https://gitlab.com/lightning-signer/validating-lightning-signer?branch=2023-05-memo-approve#da6a1f64f7322ef3c2d8c94a1d7f90a9a813c86a"
+source = "git+https://gitlab.com/cdecker/vls?tag=snapshot-20230620#3a016a06ca61edbaa7fc1350d5bde2ba0b9417d6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -427,6 +427,7 @@ dependencies = [
  "lightning",
  "lightning-invoice",
  "log",
+ "miniz_oxide 0.7.1",
  "once_cell",
  "openssl",
  "prost",
@@ -1086,8 +1087,8 @@ checksum = "ad0a93d233ebf96623465aad4046a8d3aa4da22d4f4beba5388838c8a434bbb4"
 
 [[package]]
 name = "gl-client"
-version = "0.1.6"
-source = "git+https://github.com/Blockstream/greenlight.git?rev=9f2c038#9f2c038f0a944d32f8526bb9a0f8dd0edaea53ac"
+version = "0.1.8"
+source = "git+https://github.com/Blockstream/greenlight.git?rev=bd08d4c#bd08d4cc2f1e86c0563309d271b1ecafa2d56ca3"
 dependencies = [
  "anyhow",
  "base64 0.21.2",
@@ -1605,6 +1606,15 @@ name = "miniz_oxide"
 version = "0.6.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b275950c28b37e794e8c55d88aeb5e139d0ce23fdbbeda68f8d7174abdf9e8fa"
+dependencies = [
+ "adler",
+]
+
+[[package]]
+name = "miniz_oxide"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e7810e0be55b428ada41041c41f32c9f1a42817901b4ccf45fa3d4b6561e74c7"
 dependencies = [
  "adler",
 ]
@@ -3098,8 +3108,8 @@ checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
 
 [[package]]
 name = "vls-core"
-version = "0.9.0"
-source = "git+https://gitlab.com/lightning-signer/validating-lightning-signer?branch=2023-05-memo-approve#da6a1f64f7322ef3c2d8c94a1d7f90a9a813c86a"
+version = "0.9.1-rc.2"
+source = "git+https://gitlab.com/cdecker/vls?tag=snapshot-20230620#3a016a06ca61edbaa7fc1350d5bde2ba0b9417d6"
 dependencies = [
  "anyhow",
  "backtrace",
@@ -3122,8 +3132,8 @@ dependencies = [
 
 [[package]]
 name = "vls-persist"
-version = "0.9.0"
-source = "git+https://gitlab.com/lightning-signer/validating-lightning-signer?branch=2023-05-memo-approve#da6a1f64f7322ef3c2d8c94a1d7f90a9a813c86a"
+version = "0.9.1-rc.2"
+source = "git+https://gitlab.com/cdecker/vls?tag=snapshot-20230620#3a016a06ca61edbaa7fc1350d5bde2ba0b9417d6"
 dependencies = [
  "hex",
  "log",
@@ -3135,8 +3145,8 @@ dependencies = [
 
 [[package]]
 name = "vls-protocol"
-version = "0.9.0"
-source = "git+https://gitlab.com/lightning-signer/validating-lightning-signer?branch=2023-05-memo-approve#da6a1f64f7322ef3c2d8c94a1d7f90a9a813c86a"
+version = "0.9.1-rc.2"
+source = "git+https://gitlab.com/cdecker/vls?tag=snapshot-20230620#3a016a06ca61edbaa7fc1350d5bde2ba0b9417d6"
 dependencies = [
  "as-any",
  "bolt-derive",
@@ -3149,8 +3159,8 @@ dependencies = [
 
 [[package]]
 name = "vls-protocol-signer"
-version = "0.9.0"
-source = "git+https://gitlab.com/lightning-signer/validating-lightning-signer?branch=2023-05-memo-approve#da6a1f64f7322ef3c2d8c94a1d7f90a9a813c86a"
+version = "0.9.1-rc.2"
+source = "git+https://gitlab.com/cdecker/vls?tag=snapshot-20230620#3a016a06ca61edbaa7fc1350d5bde2ba0b9417d6"
 dependencies = [
  "bit-vec",
  "log",

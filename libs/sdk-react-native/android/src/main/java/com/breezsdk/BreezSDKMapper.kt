@@ -128,6 +128,8 @@ fun pushToArray(array: WritableArray, value: Any?) {
         is Rate -> array.pushMap(readableMapOf(value))
         is ReadableArray -> array.pushArray(value)
         is ReadableMap -> array.pushMap(value)
+        is ReverseSwapInfo -> array.pushMap(readableMapOf(value))
+        is ReverseSwapPairInfo -> array.pushMap(readableMapOf(value))
         is RouteHint -> array.pushMap(readableMapOf(value))
         is RouteHintHop -> array.pushMap(readableMapOf(value))
         is String -> array.pushString(value)
@@ -258,6 +260,19 @@ fun readableMapOf(invoicePaidDetails: InvoicePaidDetails): ReadableMap {
     return readableMapOf(
             "paymentHash" to invoicePaidDetails.paymentHash,
             "bolt11" to invoicePaidDetails.bolt11
+    )
+}
+
+fun readableMapOf(backupStatus: BackupStatus): ReadableMap {
+    return readableMapOf(
+            "backedUp" to backupStatus.backedUp,
+            "lastBackupTime" to backupStatus.lastBackupTime
+    )
+}
+
+fun readableMapOf(backupFailedData: BackupFailedData): ReadableMap {
+    return readableMapOf(
+            "error" to backupFailedData.error
     )
 }
 
@@ -529,6 +544,26 @@ fun readableMapOf(swapInfo: SwapInfo): ReadableMap {
     )
 }
 
+fun readableMapOf(reverseSwapPairInfo: ReverseSwapPairInfo): ReadableMap {
+    return readableMapOf(
+            "min" to reverseSwapPairInfo.min,
+            "max" to reverseSwapPairInfo.max,
+            "feesHash" to reverseSwapPairInfo.feesHash,
+            "feesPercentage" to reverseSwapPairInfo.feesPercentage,
+            "feesLockup" to reverseSwapPairInfo.feesLockup,
+            "feesClaim" to reverseSwapPairInfo.feesClaim
+    )
+}
+
+fun readableMapOf(reverseSwapInfo: ReverseSwapInfo): ReadableMap {
+    return readableMapOf(
+            "id" to reverseSwapInfo.id,
+            "claimPubkey" to reverseSwapInfo.claimPubkey,
+            "onchainAmountSat" to reverseSwapInfo.onchainAmountSat,
+            "status" to reverseSwapInfo.status.name.lowercase()
+    )
+}
+
 fun readableMapOf(unspentTransactionOutput: UnspentTransactionOutput): ReadableMap {
     return readableMapOf(
             "txid" to unspentTransactionOutput.txid,
@@ -555,4 +590,3 @@ fun readableMapOf(vararg values: Pair<String, *>): ReadableMap {
     }
     return map
 }
-

@@ -123,15 +123,6 @@ class BreezSDKModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
         }
     }
 
-    @Throws(SdkException::class)
-    fun getBreezServices(): BlockingBreezServices {
-        if (this.breezServices != null) {
-            return this.breezServices!!
-        }
-
-        throw SdkException.Exception("BreezServices not initialized")
-    }
-
     @ReactMethod
     fun addListener(eventName: String) {
     }
@@ -140,8 +131,7 @@ class BreezSDKModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
     fun removeListeners(count: Int) {
     }
 
-    @ReactMethod
-    fun sendCommand(command: Int, data: ReadableMap, promise: Promise) {
+    private fun sendCommand(command: Int, data: ReadableMap, promise: Promise) {
         val req: Int = Random().nextInt()
         requests[req] = promise
 
@@ -390,5 +380,37 @@ class BreezSDKModule(reactContext: ReactApplicationContext) : ReactContextBaseJa
                 BreezSDKService.MSG_BUY_BITCOIN,
                 readableMapOf("provider" to provider),
                 promise)
+    }
+
+    @ReactMethod
+    fun fetchReverseSwapFees(promise: Promise) {
+        this.sendCommand(BreezSDKService.MSG_FETCH_REVERSE_SWAP_FEES, readableMapOf(), promise)
+    }
+
+    @ReactMethod
+    fun inProgressReverseSwaps(promise: Promise) {
+        this.sendCommand(BreezSDKService.MSG_IN_PROGRESS_REVERSE_SWAPS, readableMapOf(), promise)
+    }
+
+    @ReactMethod
+    fun sendOnchain(amountSat: Double, onchainRecipientAddress: String, pairHash: String, satPerVbyte: Double, promise: Promise) {
+        this.sendCommand(
+                BreezSDKService.MSG_SEND_ONCHAIN,
+                readableMapOf(
+                        "amountSat" to amountSat,
+                        "onchainRecipientAddress" to onchainRecipientAddress,
+                        "pairHash" to pairHash,
+                        "satPerVbyte" to satPerVbyte),
+                promise)
+    }
+
+    @ReactMethod
+    fun startBackup(promise: Promise) {
+        this.sendCommand(BreezSDKService.MSG_START_BACKUP, readableMapOf(), promise)
+    }
+
+    @ReactMethod
+    fun backupStatus(promise: Promise) {
+        this.sendCommand(BreezSDKService.MSG_BACKUP_STATUS, readableMapOf(), promise)
     }
 }

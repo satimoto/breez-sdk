@@ -196,6 +196,24 @@ RCT_EXTERN_METHOD(
 )
 
 RCT_EXTERN_METHOD(
+    fetchReverseSwapFees: (RCTPromiseResolveBlock)resolve
+    rejecter: (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
+    inProgressReverseSwaps: (RCTPromiseResolveBlock)resolve
+    rejecter: (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
+    sendOnchain: (NSUInteger*)amountSat
+    onchainRecipientAddress: (NSString*)onchainRecipientAddress
+    pairHash: (NSString*)pairHash
+    satPerVbyte: (NSUInteger*)satPerVbyte
+    rejecter: (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
     executeDevCommand: (NSString*)command
     resolver: (RCTPromiseResolveBlock)resolve
     rejecter: (RCTPromiseRejectBlock)reject
@@ -209,6 +227,16 @@ RCT_EXTERN_METHOD(
 RCT_EXTERN_METHOD(
         buyBitcoin: (NSString*)provider
         resolver: (RCTPromiseResolveBlock)resolve
+        rejecter: (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
+        startBackup: (RCTPromiseResolveBlock)resolve
+        rejecter: (RCTPromiseRejectBlock)reject
+)
+
+RCT_EXTERN_METHOD(
+        backupStatus: (RCTPromiseResolveBlock)resolve
         rejecter: (RCTPromiseRejectBlock)reject
 )
 

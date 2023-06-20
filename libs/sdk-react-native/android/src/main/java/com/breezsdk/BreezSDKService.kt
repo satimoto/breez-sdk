@@ -54,6 +54,11 @@ class BreezSDKService : Service() {
         const val MSG_EXECUTE_DEV_COMMAND = 36
         const val MSG_RECOMMENDED_FEES = 37
         const val MSG_BUY_BITCOIN = 38
+        const val MSG_FETCH_REVERSE_SWAP_FEES = 39
+        const val MSG_IN_PROGRESS_REVERSE_SWAPS = 40
+        const val MSG_SEND_ONCHAIN = 41
+        const val MSG_START_BACKUP = 42
+        const val MSG_BACKUP_STATUS = 43
 
         const val TAG = "BreezSDKService"
     }
@@ -77,6 +82,9 @@ class BreezSDKService : Service() {
                 is BreezEvent.PaymentFailed -> bundle.putString("data", serialize(readableMapOf("type" to "paymentFailed", "data" to readableMapOf(e.details))))
                 is BreezEvent.PaymentSucceed -> bundle.putString("data", serialize(readableMapOf("type" to "paymentSucceed", "data" to readableMapOf(e.details))))
                 is BreezEvent.Synced -> bundle.putString("data", serialize(readableMapOf("type" to "synced")))
+                is BreezEvent.BackupStarted -> bundle.putString("data", serialize(readableMapOf("type" to "backupStarted")))
+                is BreezEvent.BackupSucceeded -> bundle.putString("data", serialize(readableMapOf("type" to "backupSucceeded")))
+                is BreezEvent.BackupFailed -> bundle.putString("data", serialize(readableMapOf("type" to "backupFailed", "data" to readableMapOf(e.details))))
             }
 
             replyToRequest(replyTo, MSG_SERVICE_EVENT, 0, bundle)
@@ -138,6 +146,11 @@ class BreezSDKService : Service() {
                     MSG_EXECUTE_DEV_COMMAND -> response.putString("data", this.executeDevCommand(data))
                     MSG_RECOMMENDED_FEES -> response.putString("data", this.recommendedFees())
                     MSG_BUY_BITCOIN -> response.putString("data", this.buyBitcoin(data))
+                    MSG_FETCH_REVERSE_SWAP_FEES -> response.putString("data", this.fetchReverseSwapFees())
+                    MSG_IN_PROGRESS_REVERSE_SWAPS -> response.putString("data", this.inProgressReverseSwaps())
+                    MSG_SEND_ONCHAIN -> response.putString("data", this.sendOnchain(data))
+                    MSG_START_BACKUP -> response.putString("data", this.startBackup())
+                    MSG_BACKUP_STATUS -> response.putString("data", this.backupStatus())
                     else -> throw Exception("Error unknown command")
                 }
 
@@ -655,6 +668,65 @@ class BreezSDKService : Service() {
             }
 
             throw Exception("Missing data")
+        }
+
+        private fun fetchReverseSwapFees(): String {
+            try {
+                val reverseSwapFees = getBreezServices().fetchReverseSwapFees()
+                return serialize(readableMapOf(reverseSwapFees))
+            } catch (e: SdkException) {
+                e.printStackTrace()
+                throw Exception(e.message ?: "Error calling fetchReverseSwapFees")
+            }
+        }
+
+        private fun inProgressReverseSwaps(): String {
+            try {
+                val inProgressReverseSwaps = getBreezServices().inProgressReverseSwaps()
+                return serialize(readableArrayOf(inProgressReverseSwaps))
+            } catch (e: SdkException) {
+                e.printStackTrace()
+                throw Exception(e.message ?: "Error calling inProgressReverseSwaps")
+            }
+        }
+
+        private fun sendOnchain(data: ReadableMap): String {
+            val amountSat = data.getDouble("amountSat")
+            val onchainRecipientAddress = data.getString("onchainRecipientAddress")
+            val pairHash = data.getString("pairHash")
+            val satPerVbyte = data.getDouble("satPerVbyte")
+
+            if (onchainRecipientAddress != null && pairHash != null) {
+                try {
+                    val reverseSwapInfo =  getBreezServices().sendOnchain(amountSat.toULong(), onchainRecipientAddress, pairHash, satPerVbyte.toULong())
+                    return serialize(readableMapOf(reverseSwapInfo))
+                } catch (e: SdkException) {
+                    e.printStackTrace()
+                    throw Exception(e.message ?: "Error calling sendOnchain")
+                }
+            }
+
+            throw Exception("Missing data")
+        }
+
+        private fun startBackup(): String {
+            try {
+                getBreezServices().startBackup()
+                return serialize(readableMapOf("status" to "ok"))
+            } catch (e: SdkException) {
+                e.printStackTrace()
+                throw Exception(e.message ?: "Error calling startBackup")
+            }
+        }
+
+        private fun backupStatus(): String {
+            try {
+                val status = getBreezServices().backupStatus()
+                return serialize(readableMapOf(status))
+            } catch (e: SdkException) {
+                e.printStackTrace()
+                throw Exception(e.message ?: "Error calling backupStatus")
+            }
         }
     }
 
