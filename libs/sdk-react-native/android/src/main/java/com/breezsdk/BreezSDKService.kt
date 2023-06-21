@@ -10,10 +10,15 @@ import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.ReadableArray
 import com.facebook.react.bridge.ReadableMap
 import com.facebook.react.modules.core.DeviceEventManagerModule
+import java.util.ArrayList
 
 class BreezSDKService : Service() {
     private var breezServices: BlockingBreezServices? = null
     private var messenger = Messenger(MessageHandler())
+    private val eventListener = ServiceEventListener()
+    private val eventMessengers = ArrayList<Messenger>()
+    private val logStreamListener = ServiceLogStream()
+    private val logStreamMessengers = ArrayList<Messenger>()
 
     companion object {
         const val MSG_SERVICE_EVENT = 1
@@ -72,7 +77,39 @@ class BreezSDKService : Service() {
         throw SdkException.Exception("BreezServices not initialized")
     }
 
-    private inner class ServiceEventListener(val replyTo: Messenger) : EventListener {
+    private fun replyToRequest(messenger: Messenger, what: Int, arg1: Int, data: Bundle) {
+        val response = Message.obtain(null, what, arg1, 0)
+        response.data = data
+
+        messenger.send(response)
+    }
+
+    override fun onBind(intent: Intent): IBinder? {
+        Log.i(TAG, "onBind")
+        return messenger.binder
+    }
+
+    override fun onRebind(intent: Intent) {
+        Log.i(TAG, "onRebind")
+        super.onRebind(intent)
+    }
+
+    override fun onUnbind(intent: Intent): Boolean {
+        Log.i(TAG, "onUnbind")
+        return true
+    }
+
+    override fun onTaskRemoved(rootIntent: Intent?) {
+        Log.i(TAG, "onTaskRemoved")
+        super.onTaskRemoved(rootIntent)
+    }
+
+    override fun onDestroy() {
+        Log.i(TAG, "onDestroy")
+        super.onDestroy()
+    }
+
+    private inner class ServiceEventListener() : EventListener {
         override fun onEvent(e: BreezEvent) {
             var bundle = Bundle()
 
@@ -87,16 +124,30 @@ class BreezSDKService : Service() {
                 is BreezEvent.BackupFailed -> bundle.putString("data", serialize(readableMapOf("type" to "backupFailed", "data" to readableMapOf(e.details))))
             }
 
-            replyToRequest(replyTo, MSG_SERVICE_EVENT, 0, bundle)
+            for (eventMessenger in eventMessengers) {
+                try {
+                    replyToRequest(eventMessenger, MSG_SERVICE_EVENT, 0, bundle)
+                } catch (e: RemoteException) {
+                    e.printStackTrace()
+                    eventMessengers.remove(eventMessenger)
+                }
+            }
         }
     }
 
-    private inner class ServiceLogStream(val replyTo: Messenger) : LogStream {
+    private inner class ServiceLogStream() : LogStream {
         override fun log(logEntry: LogEntry) {
             var bundle = Bundle()
             bundle.putString("data", serialize(readableMapOf(logEntry)))
 
-            replyToRequest(replyTo, MSG_SERVICE_LOG_STREAM, 0, bundle)
+            for (logStreamMessenger in logStreamMessengers) {
+                try {
+                    replyToRequest(logStreamMessenger, MSG_SERVICE_LOG_STREAM, 0, bundle)
+                } catch (e: RemoteException) {
+                    e.printStackTrace()
+                    logStreamMessengers.remove(logStreamMessenger)
+                }
+            }
         }
     }
 
@@ -251,7 +302,8 @@ class BreezSDKService : Service() {
 
         private fun startLogStream(replyTo: Messenger): String {
             try {
-                setLogStream(ServiceLogStream(replyTo))
+                logStreamMessengers.add(replyTo)
+                setLogStream(logStreamListener)
                 return serialize(readableMapOf("status" to "ok"))
             } catch (e: SdkException) {
                 e.printStackTrace()
@@ -282,6 +334,8 @@ class BreezSDKService : Service() {
         }
 
         private fun initServices(replyTo: Messenger, data: ReadableMap): String {
+            eventMessengers.add(replyTo)
+
             if (breezServices != null) {
                 throw Exception("BreezServices already initialized")
             }
@@ -292,7 +346,7 @@ class BreezSDKService : Service() {
 
             if (config != null && creds != null && seed != null) {
                 try {
-                    breezServices = initServices(config, seed, creds, ServiceEventListener(replyTo))
+                    breezServices = initServices(config, seed, creds, eventListener)
                     return serialize(readableMapOf("status" to "ok"))
                 } catch (e: SdkException) {
                     e.printStackTrace()
@@ -728,37 +782,5 @@ class BreezSDKService : Service() {
                 throw Exception(e.message ?: "Error calling backupStatus")
             }
         }
-    }
-
-    private fun replyToRequest(messenger: Messenger, what: Int, arg1: Int, data: Bundle) {
-        val response = Message.obtain(null, what, arg1, 0)
-        response.data = data
-
-        messenger.send(response)
-    }
-
-    override fun onBind(intent: Intent): IBinder? {
-        Log.i(TAG, "onBind")
-        return messenger.binder
-    }
-
-    override fun onRebind(intent: Intent) {
-        Log.i(TAG, "onRebind")
-        super.onRebind(intent)
-    }
-
-    override fun onUnbind(intent: Intent): Boolean {
-        Log.i(TAG, "onUnbind")
-        return true
-    }
-
-    override fun onTaskRemoved(rootIntent: Intent?) {
-        Log.i(TAG, "onTaskRemoved")
-        super.onTaskRemoved(rootIntent)
-    }
-
-    override fun onDestroy() {
-        Log.i(TAG, "onDestroy")
-        super.onDestroy()
     }
 }
